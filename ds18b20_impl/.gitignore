@@ -1,0 +1,30 @@
+# Build Artifacts and Output Files
+Debug/
+Release/
+build/
+*.o
+*.obj
+*.d
+*.elf
+*.axf
+*.hex
+*.bin
+*.map
+*.lst
+objects.list
+*.su
+
+# VS Code and Tool Specific Files
+.vscode
+
+# Eclipse/STM32CubeIDE specific
+.settings
+.project
+.cproject
+.mxproject
+
+# System/Temporary Files
+*~
+*.swp
+.DS_Store
+Thumbs.db
