@@ -1,5 +1,7 @@
 #include "ds18b20.h"
+#include "stm32f1xx_hal_gpio.h"
 #include "stm32f1xx_hal_tim.h"
+#include <stdint.h>
 
 // datasheet: https://cdn-shop.adafruit.com/datasheets/DS18B20.pdf
 
@@ -111,20 +113,118 @@ static void delay_us(TIM_HandleTypeDef *timer_handle, uint16_t us) {
     ;
 };
 
-static reset_pulse(TIM_HandleTypeDef *timer_handle, GPIO_TypeDef *GPIOx,
-                   uint16_t GPIO_Pin, DS18B20_Power_Scheme PowerScheme) {
+// started referencing STM lib because I couldn't figure out the implementaion
+// details easily from just reading the datasheet while I'm learning
+
+// https://github.com/lamik/DS18B20_STM32_HAL/blob/master/Src/onewire.c
+// https://github.com/lamik/DS18B20_STM32_HAL/blob/master/Inc/onewire.h
+// https://github.com/lamik/DS18B20_STM32_HAL/blob/master/Src/ds18b20.c
+// https://github.com/lamik/DS18B20_STM32_HAL/blob/master/Inc/ds18b20.h
+static void direction_input(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin) {
+  GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pin = GPIO_Pin;
+  HAL_GPIO_Init(GPIOx, &GPIO_InitStruct);
+};
+
+static void direction_output(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin) {
+  GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pin = GPIO_Pin;
+  HAL_GPIO_Init(GPIOx, &GPIO_InitStruct);
+};
+
+uint8_t reset_pulse(TIM_HandleTypeDef *timer_handle, GPIO_TypeDef *GPIOx,
+                    uint16_t GPIO_Pin, DS18B20_Power_Scheme PowerScheme) {
   // if (PowerScheme == DS18B20_Power_Parasite) {
 
   // } else {
 
   // }
+
+  uint8_t s;
+
   // mcu sends reset pulse
   HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_RESET);
+  direction_output(GPIOx, GPIO_Pin);
   delay_us(timer_handle, 480);
-  // mcu releases and sensor detects rising edge and waits 15us-60us
-  HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_SET);
+
+  // mcu releases bus
+  direction_input(GPIOx, GPIO_Pin);
+
+  // sensor detects rising edge and waits 15us-60us
+  delay_us(timer_handle, 60);
+
+  // detect if sensor is present
+  s = HAL_GPIO_ReadPin(GPIOx, GPIO_Pin);
 
   //
+  delay_us(timer_handle, 410);
+
+  return s;
+};
+
+static void write_bit(TIM_HandleTypeDef *timer_handle, GPIO_TypeDef *GPIOx,
+                      uint16_t GPIO_Pin, uint8_t bit) {
+  if (bit) {
+    HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_RESET);
+    direction_output(GPIOx, GPIO_Pin);
+    delay_us(timer_handle, 6);
+
+    direction_input(GPIOx, GPIO_Pin);
+    delay_us(timer_handle, 64);
+  } else {
+    HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_RESET);
+    direction_output(GPIOx, GPIO_Pin);
+    delay_us(timer_handle, 60);
+
+    direction_input(GPIOx, GPIO_Pin);
+    delay_us(timer_handle, 10);
+  }
+};
+
+static uint8_t read_bit(TIM_HandleTypeDef *timer_handle, GPIO_TypeDef *GPIOx,
+                        uint16_t GPIO_Pin) {
+  uint8_t bit = 0;
+
+  HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_RESET);
+  direction_output(GPIOx, GPIO_Pin);
+  delay_us(timer_handle, 2);
+
+  direction_input(GPIOx, GPIO_Pin);
+  delay_us(timer_handle, 10);
+
+  if (HAL_GPIO_ReadPin(GPIOx, GPIO_Pin)) {
+    bit = 1;
+  }
+
+  delay_us(timer_handle, 50);
+
+  return bit;
+};
+
+static void write_byte(TIM_HandleTypeDef *timer_handle, GPIO_TypeDef *GPIOx,
+                       uint16_t GPIO_Pin, uint8_t byte) {
+  uint8_t i = 8;
+
+  do {
+    write_bit(timer_handle, GPIOx, GPIO_Pin, byte & 1);
+    byte >>= 1;
+  } while (--i);
+};
+
+static uint8_t read_byte(TIM_HandleTypeDef *timer_handle, GPIO_TypeDef *GPIOx,
+                         uint16_t GPIO_Pin) {
+  uint8_t i = 8, byte = 0;
+
+  do {
+    byte >>= 1;
+    byte |= (read_bit(timer_handle, GPIOx, GPIO_Pin) << 7);
+  } while (--i);
+
+  return byte;
 };
 
 static DS18B20_Power_Scheme DS18B20_Check_Power_Scheme() {
