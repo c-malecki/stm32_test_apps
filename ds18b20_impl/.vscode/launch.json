@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug STM32F103RB",
+      "type": "cortex-debug",
+      "request": "launch",
+      "servertype": "openocd",
+      "cwd": "${workspaceFolder}",
+      "executable": "build/ds18b20_impl.elf",
+      "device": "STM32F103RB",
+      "interface": "swd",
+      "configFiles": [
+        "interface/stlink.cfg",
+        "target/stm32f1x.cfg"
+      ],
+      "runToEntryPoint": "main",
+      "preLaunchTask": "Build firmware",
+      "svdFile": "svd/STM32F103.svd",
+      "openOCDLaunchCommands": [
+        "adapter speed 4000"
+      ]
+    }
+  ]
+}

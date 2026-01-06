@@ -1,0 +1,20 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Configure STM32",
+      "type": "shell",
+      "command": "cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=cmake/gcc-arm-none-eabi.cmake -DCMAKE_BUILD_TYPE=Debug"
+    },
+    {
+      "label": "Build firmware",
+      "type": "shell",
+      "command": "cmake --build --preset Debug",
+      "dependsOn": "Configure STM32",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}
