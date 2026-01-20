@@ -1,0 +1,40 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/arm-none-eabi-gcc",
+      "-mcpu=cortex-m4",
+      "-mthumb",
+      "-mfloat-abi=hard",
+      "-mfpu=fpv4-sp-d16",
+      "-Wall",
+      "-g",
+      "-O0",
+      "-c",
+      "-o",
+      "build/main.o",
+      "src/main.c"
+    ],
+    "directory": "/home/chris/Projects/stm32/test_apps/bare_metal",
+    "file": "/home/chris/Projects/stm32/test_apps/bare_metal/src/main.c",
+    "output": "/home/chris/Projects/stm32/test_apps/bare_metal/build/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/arm-none-eabi-gcc",
+      "-mcpu=cortex-m4",
+      "-mthumb",
+      "-mfloat-abi=hard",
+      "-mfpu=fpv4-sp-d16",
+      "-Wall",
+      "-g",
+      "-O0",
+      "-c",
+      "-o",
+      "build/startup.o",
+      "src/startup.s"
+    ],
+    "directory": "/home/chris/Projects/stm32/test_apps/bare_metal",
+    "file": "/home/chris/Projects/stm32/test_apps/bare_metal/src/startup.s",
+    "output": "/home/chris/Projects/stm32/test_apps/bare_metal/build/startup.o"
+  }
+]

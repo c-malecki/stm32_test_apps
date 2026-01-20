@@ -1,0 +1,33 @@
+example_F411
+*.vscode
+.clang-format
+.clangd
+
+# Build Artifacts and Output Files
+Debug/
+Release/
+build/
+*.o
+*.obj
+*.d
+*.elf
+*.axf
+*.hex
+*.bin
+*.map
+*.lst
+objects.list
+*.su
+*.cache
+
+# Eclipse/STM32CubeIDE specific
+.settings
+.project
+.cproject
+.mxproject
+
+# System/Temporary Files
+*~
+*.swp
+.DS_Store
+Thumbs.db
