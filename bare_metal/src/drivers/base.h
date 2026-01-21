@@ -1,4 +1,4 @@
-#ifdef _BASE_H
+#ifndef _BASE_H
 #define _BASE_H
 
 /*
@@ -21,7 +21,7 @@
   I2S2ext                       0x4000 3400
   IWDG                          0x4000 3000
   WWDG                          0x4000 2C00
-  RTC and BKP Registers             0x4000 2800
+  RTC and BKP Registers         0x4000 2800
   TIM5                          0x4000 0C00
   TIM4                          0x4000 0800
   TIM3                          0x4000 0400
@@ -189,7 +189,7 @@
 #define GPIOB (AHB1_PERIPHERAL + GPIOB_OFFSET)
 
 #define GPIOA_OFFSET (0x00020000UL)
-#define GPIOA (AHB1_PERIPHERAL + GPIOA_OFFSE)
+#define GPIOA (AHB1_PERIPHERAL + GPIOA_OFFSET)
 
 /*
   AHB2                          0x5000 0000
